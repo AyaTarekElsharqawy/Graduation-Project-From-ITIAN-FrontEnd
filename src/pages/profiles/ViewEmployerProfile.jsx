@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import {
   Building2,
   MapPin,
@@ -23,6 +24,7 @@ import {
 const ViewEmployerProfile = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
+  const user = useSelector((state) => state.user.user);
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -68,6 +70,7 @@ const ViewEmployerProfile = () => {
 
       if (response.status === 200 && response.data) {
         const profileData = response.data.data;
+        
         setProfile(profileData);
       } else {
         setError("No profile data available for this employer.");
@@ -203,21 +206,23 @@ const ViewEmployerProfile = () => {
                   <p className="text-gray-600 mt-1">{profile.industry}</p>
                 )}
                 <p className="text-gray-600 mt-2">{profile.company_description || "No company description provided"}</p>
-                <div className="mt-4 flex gap-4">
-                <button
-                 onClick={() => navigate(`/itian/mychat`, { state: { user: profile.user_id, name: profile.company_name } })}
-                 className="px-5 py-2 bg-[#d0443c] text-white rounded-lg hover:bg-[#a0302c] transition"
-                 >
-                  Message Employer
-                </button>
+                {user && user.role !== 'admin' && (
+                  <div className="mt-4 flex gap-4">
+                    <button
+                      onClick={() => navigate(`/itian/mychat`, { state: { user: profile.user_id, name: profile.company_name } })}
+                      className="px-5 py-2 bg-[#d0443c] text-white rounded-lg hover:bg-[#a0302c] transition"
+                    >
+                      Message Employer
+                    </button>
 
-                <button
-                  onClick={() => navigate(`/jobs?employer_id=${profile.user_id}`)}
-                  className="px-5 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
-                >
-                  View Jobs
-                </button>
-              </div>
+                    <button
+                      onClick={() => navigate(`/jobs?employer_id=${profile.user_id}`)}
+                      className="px-5 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+                    >
+                      View Jobs
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 

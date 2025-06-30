@@ -5,6 +5,7 @@ import Pagination from '../../components/Pagination';
 import LoaderOverlay from '../../components/LoaderOverlay';
 import Swal from 'sweetalert2';
 import StatCard from '../../components/StatCard';
+import { Link } from 'react-router-dom';
 
 const Users = () => {
   const dispatch = useDispatch();
@@ -177,7 +178,11 @@ const Users = () => {
                     <span className={`px-2 py-1 rounded text-xs font-semibold mb-1 ${user.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}>{user.is_active ? 'Active' : 'Inactive'}</span>
                     <p className="text-gray-400 text-xs mb-2 text-center w-full">Last login: {user.last_login ? new Date(user.last_login).toLocaleString() : '-'}</p>
                     <div className="flex gap-2 mt-2 w-full">
-                      <button className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition w-full text-xs font-semibold">View</button>
+                      {user.role !== 'admin' && (
+                        <Link to={`/admin/${user.role}-profile/${user.id}`}>
+                          <button className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition w-full text-xs font-semibold">View</button>
+                        </Link>
+                      )}
                       <button
                         className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition w-full text-xs font-semibold disabled:opacity-60"
                         onClick={() => handleDelete(user)}

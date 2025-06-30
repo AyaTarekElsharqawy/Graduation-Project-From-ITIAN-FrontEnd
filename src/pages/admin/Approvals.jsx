@@ -8,6 +8,7 @@ const Approvals = () => {
   const [employerRequests, setEmployerRequests] = useState([]);
   const [actionLoading, setActionLoading] = useState(false);
   const [imageModal, setImageModal] = useState({ open: false, src: '' });
+  const [briefModal, setBriefModal] = useState({ open: false, content: '', title: '' });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('itian');
   // ITIAN tab state
@@ -128,8 +129,8 @@ const Approvals = () => {
 
   // Employer search & pagination
   const filteredEmployers = employerRequests.filter(emp => {
-    const name = (emp.name || '').toLowerCase();
-    const email = (emp.email || '').toLowerCase();
+    const name = (emp.user?.name || '').toLowerCase();
+    const email = (emp.user?.email || '').toLowerCase();
     const searchTerm = employerSearch.toLowerCase();
     return name.includes(searchTerm) || email.includes(searchTerm);
   });
@@ -184,7 +185,7 @@ const Approvals = () => {
                       <th className="py-2 px-4">Email</th>
                       <th className="py-2 px-4">Status</th>
                       <th className="py-2 px-4">Certificate</th>
-                      <th className="py-2 px-4">Actions</th>
+                      <th className="py-2 px-4 text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -212,7 +213,7 @@ const Approvals = () => {
                             </button>
                           ))}
                         </td>
-                        <td className="py-2 px-4 flex gap-2">
+                        <td className="py-2 px-4 flex justify-center gap-2">
                           <button
                             className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition"
                             onClick={() => handleApprove(req.id)}
@@ -282,25 +283,39 @@ const Approvals = () => {
                     <tr className="bg-red-600 text-white">
                       <th className="py-2 px-4">Name</th>
                       <th className="py-2 px-4">Email</th>
+                      <th className="py-2 px-4">Company Brief</th>
                       <th className="py-2 px-4">Status</th>
-                      <th className="py-2 px-4">Actions</th>
+                      <th className="py-2 px-4 text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {paginatedEmployers.length > 0 ? paginatedEmployers.map((emp) => (
                       <tr key={emp.id} className="border-b hover:bg-gray-50">
-                        <td className="py-2 px-4">{emp.name}</td>
-                        <td className="py-2 px-4">{emp.email}</td>
-                        <td className="py-2 px-4">{emp.is_active ? 'Active' : 'Inactive'}</td>
-                        <td className="py-2 px-4 flex gap-2">
+                        <td className="py-2 px-4">{emp.user?.name}</td>
+                        <td className="py-2 px-4">{emp.user?.email}</td>
+                        <td className="py-2 px-4 max-w-sm">
+                          <p className="truncate" title={emp.company_brief}>
+                            {emp.company_brief || 'N/A'}
+                          </p>
+                          {emp.company_brief && (
+                            <button
+                              className="text-blue-600 text-sm hover:underline"
+                              onClick={() => setBriefModal({ open: true, content: emp.company_brief, title: emp.user?.name })}
+                            >
+                              View Full Brief
+                            </button>
+                          )}
+                        </td>
+                        <td className="py-2 px-4">{emp.user?.is_active ? 'Active' : 'Inactive'}</td>
+                        <td className="py-2 px-4 flex justify-center gap-2">
                           <button
                             className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition"
                             onClick={async () => {
                               setActionLoading(true);
                               try {
                                 const token = localStorage.getItem('access-token');
-                                console.log(`Approving employer with ID: ${emp.id}`);
-                                await axios.post(`http://127.0.0.1:8000/api/users/${emp.id}/approve-employer`, {}, {
+                                console.log(`Approving employer with user ID: ${emp.user.id}`);
+                                await axios.post(`http://127.0.0.1:8000/api/users/${emp.user.id}/approve-employer`, {}, {
                                   headers: { Authorization: `Bearer ${token}` },
                                 });
                                 Swal.fire('Approved!', 'The employer has been approved.', 'success');
@@ -312,7 +327,7 @@ const Approvals = () => {
                                 setActionLoading(false);
                               }
                             }}
-                            disabled={emp.is_active}
+                            disabled={emp.user?.is_active}
                           >
                             Approve
                           </button>
@@ -322,7 +337,7 @@ const Approvals = () => {
                               setActionLoading(true);
                               try {
                                 const token = localStorage.getItem('access-token');
-                                await axios.post(`http://127.0.0.1:8000/api/users/${emp.id}/reject-employer`, {}, {
+                                await axios.post(`http://127.0.0.1:8000/api/users/${emp.user.id}/reject-employer`, {}, {
                                   headers: { Authorization: `Bearer ${token}` },
                                 });
                                 Swal.fire('Rejected!', 'The employer has been rejected.', 'success');
@@ -334,7 +349,7 @@ const Approvals = () => {
                                 setActionLoading(false);
                               }
                             }}
-                            disabled={emp.is_active}
+                            disabled={emp.user?.is_active}
                           >
                             Reject
                           </button>
@@ -342,7 +357,7 @@ const Approvals = () => {
                       </tr>
                     )) : (
                       <tr>
-                        <td colSpan={4} className="text-center py-4 text-gray-500">
+                        <td colSpan={5} className="text-center py-4 text-gray-500">
                           No unapproved employers found.
                         </td>
                       </tr>
@@ -392,6 +407,29 @@ const Approvals = () => {
               alt="Certificate"
               className="max-h-[80vh] max-w-full rounded shadow-lg border-4 border-white"
             />
+          </div>
+        </div>
+      )}
+      {briefModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80" onClick={() => setBriefModal({ open: false, content: '', title: '' })}>
+          <div className="relative max-w-2xl w-full bg-white rounded-lg shadow-xl m-4" onClick={e => e.stopPropagation()}>
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-gray-800">Company Brief for {briefModal.title}</h3>
+                <button
+                  className="text-gray-400 hover:text-gray-600"
+                  onClick={() => setBriefModal({ open: false, content: '', title: '' })}
+                  aria-label="Close modal"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="max-h-[60vh] overflow-y-auto pr-2">
+                <p className="text-gray-700 whitespace-pre-wrap">{briefModal.content}</p>
+              </div>
+            </div>
           </div>
         </div>
       )}

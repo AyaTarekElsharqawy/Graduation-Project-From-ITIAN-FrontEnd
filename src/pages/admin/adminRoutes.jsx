@@ -10,6 +10,8 @@ import AdminReportPage from './AdminReportPage.jsx';
 import AdminSetPricePage from './AdminSetPricePage.jsx';
 import AdminSendEmail from './AdminSendEmailPage.jsx';
 import AdminTestimonials from './AdminTestimonials.jsx';
+import ViewItianProfile from '../profiles/ViewItianProfile.jsx';
+import ViewEmployerProfile from '../profiles/ViewEmployerProfile.jsx';
 
 
 const adminRoutes = [
@@ -22,6 +24,9 @@ const adminRoutes = [
   <Route key="set-price" path="set-price" element={<AdminSetPricePage />} />,
   <Route key="send-email" path="send-email" element={<AdminSendEmail />} />,
   <Route key="testimonials" path="testimonials" element={<AdminTestimonials />} />,
+  <Route path="/admin/itian-profile/:userId" element={<ViewItianProfile />} />,
+<Route path="/admin/employer-profile/:userId" element={<ViewEmployerProfile />} />
+
 ];
 
 export default adminRoutes;
