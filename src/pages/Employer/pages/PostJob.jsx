@@ -47,7 +47,14 @@ const PostJob = () => {
           errors.job_title = 'Job title is required';
         }
         break;
-        
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="relative">
+          <div className="w-20 h-20 border-4 border-red-200 border-t-red-600 rounded-full animate-spin"></div>
+          <div className="absolute inset-0 w-20 h-20 border-4 border-transparent border-t-red-500 rounded-full animate-spin animation-delay-150"></div>
+          <Sparkles className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-red-600 w-8 h-8 animate-pulse" />
+        </div>
+        <p className="ml-6 text-gray-800 text-xl font-medium animate-pulse">Loading job details...</p>
+      </div>
       case 'description':
         if (!value.trim()) {
           errors.description = 'Job description is required';

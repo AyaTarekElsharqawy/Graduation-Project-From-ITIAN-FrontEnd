@@ -34,10 +34,10 @@ export const testimonialsApi = createApi({
       providesTags: ['Testimonial'],
     }),
     updateTestimonialStatus: builder.mutation({
-      query: ({ id, status }) => ({
+      query: ({ id, status ,rating}) => ({
         url: `/admin/testimonials/${id}/status`,
         method: 'PATCH',
-        body: { status },
+        body: { status, rating},
       }),
       invalidatesTags: ['Testimonial'],
     }),

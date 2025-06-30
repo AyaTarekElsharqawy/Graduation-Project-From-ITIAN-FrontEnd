@@ -11,7 +11,7 @@ import { Dialog } from '@headlessui/react'
 import { useSelector } from 'react-redux';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
-
+import { Link } from 'react-router-dom';
 import '../styles/home.css';
 import { useTranslation } from "../../../contexts/TranslationContext"
 import LanguageSwitcher from "../../../components/LanguageSwitcher"
@@ -21,8 +21,6 @@ const AnimatedCounter = ({ value, duration = 2000 }) => {
   const [count, setCount] = useState(0)
 
   useEffect(() => {
-    const isPercent = typeof value === "string" && value.includes("%");
-    const isPlus = typeof value === "string" && value.includes("+");
     const cleanValue = parseInt(value);
     const increment = cleanValue / (duration / 50)
     const timer = setInterval(() => {
@@ -88,6 +86,7 @@ function LandingPageContent() {
   const [showModal, setShowModal] = useState(false)
   const [message, setMessage] = useState('')
   const [addTestimonial] = useAddTestimonialMutation();
+  const [rating, setRating] = useState(0);
 
   // ---- FIX: Correctly extract testimonials from API response ----
   const { data: response = {}, isLoading: testimonialsLoading } = useGetTestimonialsQuery();
@@ -112,9 +111,10 @@ function LandingPageContent() {
       email: email || "noemail@example.com",
       role: role,
       message: message,
-      rating: 5
+      rating: rating
     });
     setMessage('')
+    setRating(0)
     setShowModal(false)
   }
   const { t, isRTL } = useTranslation();
@@ -461,7 +461,7 @@ function LandingPageContent() {
                     className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-gray-100 border-red-200 group"
                   >
                     <div className="flex items-center gap-1 mb-6">
-                      {[...Array(testimonial.rating || 5)].map((_, i) => (
+                      {[...Array(testimonial.rating || 0)].map((_, i) => (
                         <Star key={i} className="w-5 h-5 fill-red-400 text-red-400 group-hover:scale-110 transition-transform duration-300" />
                       ))}
                     </div>
@@ -490,7 +490,7 @@ function LandingPageContent() {
                   onClick={() => setShowModal(true)}
                   className="bg-red-600 text-white px-6 py-3 rounded-xl font-semibold shadow hover:bg-red-700 transition"
                 >
-                  Contact Us
+                  Review
                 </button>
               </div>
 
@@ -505,6 +505,26 @@ function LandingPageContent() {
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                     />
+               <div className="flex items-center mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      onClick={() => setRating(i + 1)}
+                      className={`w-6 h-6 cursor-pointer transition-all ${
+                        i < rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                      }`}
+                    />
+                  ))}
+                  <p className="text-sm text-gray-500 ml-2">
+                    {rating === 1 && "Very Bad"}
+                    {rating === 2 && "Bad"}
+                    {rating === 3 && "Okay"}
+                    {rating === 4 && "Good"}
+                    {rating === 5 && "Excellent"}
+                  </p>
+                </div>
+
+
                     <div className="flex justify-end gap-3">
                       <button
                         onClick={() => setShowModal(false)}
@@ -555,51 +575,127 @@ function LandingPageContent() {
           </FadeInElement>
         </div>
       </section>
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            <FadeInElement>
-              <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-red-400 to-rose-400 bg-clip-text text-transparent">
-                ITI Career Gateway
-              </h3>
-              <p className="text-gray-300 mb-6 leading-relaxed">
-                {t('footer.description')}
+   <footer className="bg-gradient-to-b from-gray-900 to-gray-950 text-white py-16 relative overflow-hidden">
+  {/* Background Pattern */}
+  <div className="absolute inset-0 opacity-5">
+    <div className="absolute inset-0" style={{
+      backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+    }}/>
+  </div>
+  
+  <div className="container mx-auto px-4 relative z-10">
+    <div className="grid md:grid-cols-4 gap-8">
+      {/* Company Info */}
+      <FadeInElement>
+        <div className="space-y-6">
+          <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-red-400 to-rose-400 bg-clip-text text-transparent">
+            ITI Career Gateway
+          </h3>
+          <p className="text-gray-300 mb-6 leading-relaxed">
+            {t('footer.description')}
+          </p>
+        </div>
+      </FadeInElement>
+
+      {/* Quick Links */}
+      <FadeInElement delay={1}>
+        <div className="space-y-6">
+          <h4 className="font-semibold mb-6 text-lg text-white border-b border-red-400 pb-2 inline-block">
+            {t('footer.quickLinks.title')}
+          </h4>
+          <ul className="space-y-3">
+            {role === 'itian' && (
+              <li>
+                <Link to="/jobs" className="text-gray-300 hover:text-red-400 transition-all duration-300 flex items-center group">
+                  <span className="w-2 h-2 bg-red-400 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  {t('footer.quickLinks.items.findJobs')}
+                </Link>
+              </li>
+            )}
+            {role === 'employer' && (
+              <li>
+                <Link to="/employer/post-job" className="text-gray-300 hover:text-red-400 transition-all duration-300 flex items-center group">
+                  <span className="w-2 h-2 bg-red-400 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  {t('footer.quickLinks.items.postJob')}
+                </Link>
+              </li>
+            )}
+            <li>
+              <Link to="/posts" className="text-gray-300 hover:text-red-400 transition-all duration-300 flex items-center group">
+                <span className="w-2 h-2 bg-red-400 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                {t('footer.quickLinks.items.community')}
+              </Link>
+            </li>
+            {role === 'itian' && (
+              <li>
+                <Link to="/itian/my-reports" className="text-gray-300 hover:text-red-400 transition-all duration-300 flex items-center group">
+                  <span className="w-2 h-2 bg-red-400 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  {t('footer.quickLinks.items.reports') || 'Reports'}
+                </Link>
+              </li>
+            )}
+            {role === 'employer' && (
+              <li>
+                <Link to="/employer/my-reports" className="text-gray-300 hover:text-red-400 transition-all duration-300 flex items-center group">
+                  <span className="w-2 h-2 bg-red-400 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                  {t('footer.quickLinks.items.reports') || 'Reports'}
+                </Link>
+              </li>
+            )}
+          </ul>
+        </div>
+      </FadeInElement>
+
+      {/* Empty Column for Spacing */}
+      <div className="hidden md:block"></div>
+
+      {/* Company Info */}
+      <FadeInElement delay={3}>
+        <div className="space-y-6">
+          <h4 className="font-semibold mb-6 text-lg text-white border-b border-red-400 pb-2 inline-block">
+            Company
+          </h4>
+          <div className="space-y-4">
+            <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700/50 hover:border-red-400/30 transition-colors duration-300">
+              <p className="font-medium text-white mb-2 flex items-center">
+                <svg className="w-4 h-4 mr-2 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                </svg>
+                Address:
               </p>
-            </FadeInElement>
-            <FadeInElement delay={1}>
-              <h4 className="font-semibold mb-6 text-lg">{t('footer.quickLinks.title')}</h4>
-              <ul className="space-y-3 text-gray-300">
-                <li><a href="#" className="hover:text-red-400 transition-colors">{t('footer.quickLinks.items.findJobs')}</a></li>
-                <li><a href="#" className="hover:text-red-400 transition-colors">{t('footer.quickLinks.items.postJob')}</a></li>
-                <li><a href="#" className="hover:text-red-400 transition-colors">{t('footer.quickLinks.items.community')}</a></li>
-                <li><a href="#" className="hover:text-red-400 transition-colors">{t('footer.quickLinks.items.aboutIti')}</a></li>
-              </ul>
-            </FadeInElement>
-            <FadeInElement delay={2}>
-              <h4 className="font-semibold mb-6 text-lg">{t('footer.categories.title')}</h4>
-              <ul className="space-y-3 text-gray-300">
-                <li><a href="#" className="hover:text-red-400 transition-colors">{t('footer.categories.items.softwareDev')}</a></li>
-                <li><a href="#" className="hover:text-red-400 transition-colors">{t('footer.categories.items.networkEng')}</a></li>
-                <li><a href="#" className="hover:text-red-400 transition-colors">{t('footer.categories.items.graphicDesign')}</a></li>
-                <li><a href="#" className="hover:text-red-400 transition-colors">{t('footer.categories.items.dataScience')}</a></li>
-              </ul>
-            </FadeInElement>
-            <FadeInElement delay={3}>
-              <h4 className="font-semibold mb-6 text-lg">{t('footer.support.title')}</h4>
-              <ul className="space-y-3 text-gray-300">
-                <li><a href="#" className="hover:text-red-400 transition-colors">{t('footer.support.items.helpCenter')}</a></li>
-                <li><a href="#" className="hover:text-red-400 transition-colors">{t('footer.support.items.contactUs')}</a></li>
-                <li><a href="#" className="hover:text-red-400 transition-colors">{t('footer.support.items.privacyPolicy')}</a></li>
-                <li><a href="#" className="hover:text-red-400 transition-colors">{t('footer.support.items.termsOfService')}</a></li>
-              </ul>
-            </FadeInElement>
-          </div>
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>{t('footer.copyright')}</p>
+              <p className="text-sm leading-relaxed text-gray-300">
+                Information Technology Institute<br/>
+                Smart Village, Km 28<br/>
+                Cairo-Alexandria Desert Road<br/>
+                Giza, Egypt
+              </p>
+            </div>
+
+            <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700/50 hover:border-red-400/30 transition-colors duration-300">
+              <p className="font-medium text-white mb-2 flex items-center">
+                <svg className="w-4 h-4 mr-2 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                </svg>
+                Email:
+              </p>
+              <a href="mailto:info@iticareergateway.com" className="text-sm hover:text-red-400 transition-colors duration-300 text-gray-300">
+                info@iticareergateway.com
+              </a>
+            </div>
           </div>
         </div>
-      </footer>
+      </FadeInElement>
+    </div>
+
+    {/* Copyright */}
+     <div className="border-t border-gray-700/50 mt-12 pt-8">
+    <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+      <p className="text-gray-400 text-sm">{t('footer.copyright')}</p>
+    </div>
+  </div>
+    </div>  
+</footer>
     </div>
   )
 }

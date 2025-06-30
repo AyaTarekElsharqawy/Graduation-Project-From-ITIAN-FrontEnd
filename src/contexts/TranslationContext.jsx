@@ -153,7 +153,8 @@ const translations = {
           findJobs: "Find Jobs",
           postJob: "Post a Job", 
           community: "Community",
-          aboutIti: "About ITI"
+          aboutIti: "About ITI",
+          reports: "Reports"
         }
       },
       categories: {

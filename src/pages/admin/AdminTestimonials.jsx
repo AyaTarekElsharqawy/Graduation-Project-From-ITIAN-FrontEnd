@@ -61,6 +61,7 @@ const testimonials = response.data || [];
       setActionLoading(true);
       await updateStatus({ id, status: 'approved' }).unwrap();
       refetch();
+      setShowDetailsModal(false);
     } finally {
       setActionLoading(false);
     }
@@ -71,6 +72,7 @@ const testimonials = response.data || [];
       setActionLoading(true);
       await updateStatus({ id, status: 'rejected' }).unwrap();
       refetch();
+      setShowDetailsModal(false);
     } finally {
       setActionLoading(false);
     }
@@ -322,7 +324,7 @@ const testimonials = response.data || [];
                       {testimonial.role || 'User'}
                     </p>
                     <div className="flex items-center justify-center gap-1 mb-4">
-                      {[...Array(testimonial.rating || 5)].map((_, i) => (
+                      {[...Array(testimonial.rating || 0)].map((_, i) => (
                         <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                       ))}
                     </div>
@@ -337,7 +339,7 @@ const testimonials = response.data || [];
                         <Eye className="w-4 h-4 mr-1" />
                         View
                       </button>
-                      {testimonial.status === 'pending' && (
+                      {/* {testimonial.status === 'pending' && (
                         <>
                           <button
                             className="flex-1 flex items-center justify-center bg-green-600 text-white rounded-lg px-3 py-2 text-sm font-medium hover:bg-green-700 transition-colors"
@@ -356,7 +358,7 @@ const testimonials = response.data || [];
                             Reject
                           </button>
                         </>
-                      )}
+                      )} */}
                     </div>
                   </div>
                 </div>
@@ -417,15 +419,18 @@ const testimonials = response.data || [];
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Rating */}
                     <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                    <h4 className="text-sm font-semibold text-gray-800 mb-3">Rating</h4>
-                    <div className="flex items-center gap-1">
-                        {[...Array(selectedTestimonial.rating || 5)].map((_, i) => (
-                        <Star key={i} className="w-6 h-6 fill-yellow-400 text-yellow-400" />
-                        ))}
-                        <span className="ml-2 text-sm font-medium text-gray-700">
-                        {selectedTestimonial.rating || 5}/5
-                        </span>
-                    </div>
+                      <h4 className="text-sm font-semibold text-gray-800 mb-3">Rating</h4>
+                      <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-6 h-6 transition-colors ${
+                                i < (selectedTestimonial.rating || 0) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                              }`}
+                            />
+                          ))}
+                        <span className="ml-2 text-sm font-medium text-gray-700">{selectedTestimonial.rating || 0}/5</span>
+                      </div>
                     </div>
 
                     {/* Status */}
@@ -461,48 +466,52 @@ const testimonials = response.data || [];
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-                    <button
-                    onClick={() => handleDelete(selectedTestimonial.id)}
-                    disabled={actionLoading}
-                    className="inline-flex items-center px-5 py-2.5 border border-red-200 text-sm font-medium rounded-lg text-red-600 bg-red-50 hover:bg-red-100 hover:border-red-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                    >
-                    {actionLoading ? 'Deleting...' : (
-                        <>
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete
-                        </>
-                    )}
-                    </button>
-                    {selectedTestimonial.status === 'pending' && (
-                    <div className="flex gap-3">
-                        <button
-                        onClick={() => handleApprove(selectedTestimonial.id)}
-                        disabled={actionLoading}
-                        className="inline-flex items-center px-5 py-2.5 border border-green-200 text-sm font-medium rounded-lg text-green-600 bg-green-50 hover:bg-green-100 hover:border-green-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                        >
-                        {actionLoading ? 'Processing...' : (
-                            <>
-                            <CheckCircle className="w-4 h-4 mr-2" />
-                            Approve
-                            </>
-                        )}
-                        </button>
-                        <button
-                        onClick={() => handleReject(selectedTestimonial.id)}
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pt-6 border-t border-gray-200">
+                    <div className="flex gap-3 flex-wrap">
+                      <button
+                        onClick={() => handleDelete(selectedTestimonial.id)}
                         disabled={actionLoading}
                         className="inline-flex items-center px-5 py-2.5 border border-red-200 text-sm font-medium rounded-lg text-red-600 bg-red-50 hover:bg-red-100 hover:border-red-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                        >
-                        {actionLoading ? 'Processing...' : (
-                            <>
-                            <XCircle className="w-4 h-4 mr-2" />
-                            Reject
-                            </>
+                      >
+                        {actionLoading ? 'Deleting...' : (
+                          <>
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </>
                         )}
-                        </button>
+                      </button>
+
                     </div>
+
+                    {selectedTestimonial.status === 'pending' && (
+                      <div className="flex gap-3 flex-wrap">
+                        <button
+                          onClick={() => handleApprove(selectedTestimonial.id)}
+                          disabled={actionLoading}
+                          className="inline-flex items-center px-5 py-2.5 border border-green-200 text-sm font-medium rounded-lg text-green-600 bg-green-50 hover:bg-green-100 hover:border-green-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                        >
+                          {actionLoading ? 'Processing...' : (
+                            <>
+                              <CheckCircle className="w-4 h-4 mr-2" />
+                              Approve
+                            </>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => handleReject(selectedTestimonial.id)}
+                          disabled={actionLoading}
+                          className="inline-flex items-center px-5 py-2.5 border border-red-200 text-sm font-medium rounded-lg text-red-600 bg-red-50 hover:bg-red-100 hover:border-red-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                        >
+                          {actionLoading ? 'Processing...' : (
+                            <>
+                              <XCircle className="w-4 h-4 mr-2" />
+                              Reject
+                            </>
+                          )}
+                        </button>
+                      </div>
                     )}
-                </div>
+                  </div>
                 </div>
             </div>
             </div>

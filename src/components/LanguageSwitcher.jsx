@@ -9,8 +9,8 @@ const LanguageSwitcher = ({ className = "" }) => {
   const dropdownRef = useRef(null);
 
   const languages = [
-    { code: 'en', name: 'English', flag: '🇺🇸' },
-    { code: 'ar', name: 'العربية', flag: '🇪🇬' }
+    { code: 'en', name: 'English',},
+    { code: 'ar', name: 'العربية',  }
   ];
 
   const currentLanguage = languages.find(lang => lang.code === language);

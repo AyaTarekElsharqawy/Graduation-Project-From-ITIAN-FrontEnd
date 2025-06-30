@@ -44,6 +44,8 @@ const Approvals = () => {
         },
       });
       setEmployerRequests(empResponse.data);
+            console.log('Employer Data:', empResponse.data);
+
     } catch (error) {
       console.error('Failed to fetch unapproved employers:', error);
     }
