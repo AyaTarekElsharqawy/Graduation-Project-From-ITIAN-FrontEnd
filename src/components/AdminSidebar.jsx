@@ -15,10 +15,10 @@ const AdminSidebar = () => {
           <span>Approvals</span>
         </Link>
         
-        <Link to="/admin/posts" className="admin-sidebar-link">
+        {/* <Link to="/admin/posts" className="admin-sidebar-link">
           <span className="admin-sidebar-icon">📝</span>
           <span>Posts</span>
-        </Link>
+        </Link> */}
         
         <Link to="/admin/users" className="admin-sidebar-link">
           <span className="admin-sidebar-icon">👥</span>
