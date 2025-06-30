@@ -93,7 +93,14 @@ useEffect(() => {
 
 const isJobExpired = (job) => {
   if (!job.application_deadline) return false;
-  return new Date().toDateString() > new Date(job.application_deadline).toDateString();
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const deadline = new Date(job.application_deadline);
+  deadline.setHours(23, 59, 59, 999); // تسيب الوظيفة مفتوحة لنهاية اليوم
+
+  return today > deadline;
 };
 
 
@@ -193,36 +200,41 @@ const isJobExpired = (job) => {
   };
 
   // Function to format deadline and show expiry status
-  const formatDeadlineStatus = (job) => {
-    if (!job.application_deadline) return null;
-    
-    const currentDate = new Date();
-    const deadlineDate = new Date(job.application_deadline);
-    const isExpired = new Date(currentDate.toDateString()) > new Date(deadlineDate.toDateString());
-    
-    const formattedDate = deadlineDate.toLocaleDateString('en-GB');
-    
-    if (isExpired) {
-      return (
-        <div style={{ color: '#dc2626', fontSize: '12px', fontWeight: '500' }}>
-          Expired: {formattedDate}
-        </div>
-      );
-    } else {
-      const timeDiff = deadlineDate - currentDate;
-      const daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-      
-      return (
-        <div style={{ 
-          color: daysLeft <= 3 ? '#dc2626' : '#059669', 
-          fontSize: '12px', 
-          fontWeight: '500' 
-        }}>
-          Deadline: {formattedDate} ({daysLeft} days left)
-        </div>
-      );
-    }
-  };
+const formatDeadlineStatus = (job) => {
+  if (!job.application_deadline) return null;
+
+  const currentDate = new Date();
+  currentDate.setHours(0, 0, 0, 0);
+
+  const deadlineDate = new Date(job.application_deadline);
+  deadlineDate.setHours(23, 59, 59, 999);
+
+  const isExpired = currentDate > deadlineDate;
+
+  const formattedDate = deadlineDate.toLocaleDateString('en-GB');
+
+  if (isExpired) {
+    return (
+      <div style={{ color: '#dc2626', fontSize: '12px', fontWeight: '500' }}>
+        Expired: {formattedDate}
+      </div>
+    );
+  } else {
+    const timeDiff = deadlineDate - currentDate;
+    const daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+    return (
+      <div style={{
+        color: daysLeft <= 3 ? '#dc2626' : '#059669',
+        fontSize: '12px',
+        fontWeight: '500'
+      }}>
+        Deadline: {formattedDate} ({daysLeft} days left)
+      </div>
+    );
+  }
+};
+
 
   // Pagination component
   const PaginationComponent = () => {
