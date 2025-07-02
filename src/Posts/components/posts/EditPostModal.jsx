@@ -9,19 +9,89 @@ const EditPostModal = ({ post, onClose, onUpdate }) => {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(post.image ? `http://localhost:8000/storage/${post.image}` : null);
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({
+    title: '',
+    content: '',
+    image: '',
+    general: ''
+  });
+  
   const fileInputRef = useRef(null);
   const modalRef = useRef(null);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate image file type and size
+      const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+      const maxSize = 2 * 1024 * 1024; // 2MB
+      
+      if (!validTypes.includes(file.type)) {
+        setErrors({
+          ...errors,
+          image: 'Please upload a valid image (JPEG, PNG, JPG, GIF)'
+        });
+        return;
+      }
+      
+      if (file.size > maxSize) {
+        setErrors({
+          ...errors,
+          image: 'Image size should be less than 2MB'
+        });
+        return;
+      }
+      
+      setErrors({ ...errors, image: '' });
       setImage(file);
       setPreview(URL.createObjectURL(file));
     }
   };
 
+  const validateForm = () => {
+    const newErrors = {
+      title: '',
+      content: '',
+      image: '',
+      general: ''
+    };
+    let isValid = true;
+
+    // Title validation
+    if (title && title.length > 255) {
+      newErrors.title = 'Title should be less than 255 characters';
+      isValid = false;
+    }
+
+    // Content validation
+    if (content && content.length > 5000) {
+      newErrors.content = 'Content is too long (max 5000 characters)';
+      isValid = false;
+    }
+
+    // Title requires content
+    if (title.trim() && !content.trim()) {
+      newErrors.content = 'Please provide content when adding a title';
+      isValid = false;
+    }
+
+    // At least one field must be provided
+    if (!title.trim() && !content.trim() && !image) {
+      newErrors.general = 'Please provide at least one of: content or image (title requires content)';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
@@ -31,11 +101,27 @@ const EditPostModal = ({ post, onClose, onUpdate }) => {
       onClose();
     } catch (error) {
       console.error('Error updating post:', error);
-      toast.error('Failed to update post');
+      setErrors({
+        ...errors,
+        general: error.response?.data?.error || 'Failed to update post'
+      });
+      toast.error(error.response?.data?.error || 'Failed to update post');
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Helper component for error messages
+  const ErrorMessage = ({ message }) => (
+    <motion.div
+      initial={{ opacity: 0, y: -5 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="text-red-500 text-xs mt-1 flex items-start"
+    >
+      <span className="mr-1">⚠️</span>
+      <span>{message}</span>
+    </motion.div>
+  );
 
   return (
     <AnimatePresence>
@@ -43,7 +129,7 @@ const EditPostModal = ({ post, onClose, onUpdate }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+        className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
       >
         {/* Backdrop with blur */}
         <motion.div
@@ -102,23 +188,45 @@ className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
           {/* Form content */}
           <div className="p-6 overflow-y-auto flex-grow bg-gradient-to-b from-white to-red-50">
             <form onSubmit={handleSubmit}>
+              {/* General error message */}
+              {errors.general && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-red-600 bg-red-100 border border-red-300 rounded-lg p-3 mb-4 text-sm font-medium shadow-sm flex items-start"
+                >
+                  <span className="mr-2">⚠️</span>
+                  <span>{errors.general}</span>
+                </motion.div>
+              )}
+
               {/* Title field */}
               <motion.div
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="mb-6"
+                className="mb-4"
               >
                 <label className="block text-red-700 font-medium mb-2">
-                  Title
+                  Title <span className="text-gray-400 text-sm">(requires content)</span>
                 </label>
                 <div className="relative">
                   <input
                     type="text"
                     value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-300 shadow-sm"
-                    required
+                    onChange={(e) => {
+                      setTitle(e.target.value);
+                      if (errors.title || errors.content) {
+                        setErrors({ 
+                          ...errors, 
+                          title: '',
+                          content: '' 
+                        });
+                      }
+                    }}
+                    className={`w-full border-2 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-200 transition-all duration-300 shadow-sm ${
+                      errors.title ? 'border-red-400' : 'border-gray-200 focus:border-red-500'
+                    }`}
                   />
                   <motion.div 
                     whileHover={{ scale: 1.05 }}
@@ -127,6 +235,10 @@ className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
                     📝
                   </motion.div>
                 </div>
+                {errors.title && <ErrorMessage message={errors.title} />}
+                <div className="text-xs text-gray-500 mt-1 text-right">
+                  {title.length}/255 characters
+                </div>
               </motion.div>
 
               {/* Content field */}
@@ -134,18 +246,28 @@ className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="mb-6"
+                className="mb-4"
               >
                 <label className="block text-red-700 font-medium mb-2">
-                  Content
+                  Content <span className="text-gray-400 text-sm">(optional unless title is provided)</span>
                 </label>
                 <textarea
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  className="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-300 shadow-sm resize-none"
+                  onChange={(e) => {
+                    setContent(e.target.value);
+                    if (errors.content) {
+                      setErrors({ ...errors, content: '' });
+                    }
+                  }}
+                  className={`w-full border-2 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-200 transition-all duration-300 shadow-sm resize-none ${
+                    errors.content ? 'border-red-400' : 'border-gray-200 focus:border-red-500'
+                  }`}
                   rows="4"
-                  required
                 />
+                {errors.content && <ErrorMessage message={errors.content} />}
+                <div className="text-xs text-gray-500 mt-1 text-right">
+                  {content.length}/5000 characters
+                </div>
               </motion.div>
 
               {/* Image upload */}
@@ -153,24 +275,31 @@ className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                className="mb-8"
+                className="mb-6"
               >
                 <label className="block text-red-700 font-medium mb-2">
-                  Update Image
+                  Update Image <span className="text-gray-400 text-sm">(optional)</span>
                 </label>
                 <input
                   type="file"
                   ref={fileInputRef}
                   onChange={handleImageChange}
-                  accept="image/*"
+                  accept="image/jpeg, image/png, image/jpg, image/gif"
                   className="hidden"
                 />
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   type="button"
-                  onClick={() => fileInputRef.current.click()}
-                  className="flex items-center justify-center w-full py-4 px-4 border-2 border-dashed border-red-300 rounded-xl bg-red-50 hover:bg-red-100 transition-all duration-300 shadow-inner"
+                  onClick={() => {
+                    fileInputRef.current.click();
+                    setErrors({ ...errors, image: '' });
+                  }}
+                  className={`flex items-center justify-center w-full py-4 px-4 rounded-xl transition-all duration-300 shadow-inner ${
+                    errors.image 
+                      ? 'border-2 border-dashed border-red-400 bg-red-50' 
+                      : 'border-2 border-dashed border-red-300 bg-red-50 hover:bg-red-100'
+                  }`}
                 >
                   <motion.div 
                     animate={{ 
@@ -185,6 +314,11 @@ className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
                     {preview ? 'Change Image' : 'Upload an Image'}
                   </span>
                 </motion.button>
+                
+                {errors.image && <ErrorMessage message={errors.image} />}
+                <div className="text-xs text-gray-500 mt-1">
+                  Max size: 2MB (JPEG, PNG, GIF)
+                </div>
 
                 {preview && (
                   <motion.div
@@ -203,6 +337,7 @@ className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
                       onClick={() => {
                         setPreview(null);
                         setImage(null);
+                        setErrors({ ...errors, image: '' });
                       }}
                       className="absolute top-3 right-3 bg-red-600 text-white p-2 rounded-full shadow-lg hover:bg-red-700 transition-all"
                     >

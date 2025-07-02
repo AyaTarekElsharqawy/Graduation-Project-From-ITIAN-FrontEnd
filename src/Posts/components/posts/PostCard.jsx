@@ -44,6 +44,14 @@ const PostCard = memo(
     const [userReaction, setUserReaction] = useState(post.user_reaction);
     const [showReactionPicker, setShowReactionPicker] = useState(false);
     const [showOptions, setShowOptions] = useState(false);
+    const [showFullContent, setShowFullContent] = useState(false);
+    const MAX_CONTENT_LENGTH = 250;
+    const isLongContent =
+      post.content && post.content.length > MAX_CONTENT_LENGTH;
+    const displayedContent =
+      !isLongContent || showFullContent
+        ? post.content
+        : post.content.slice(0, MAX_CONTENT_LENGTH) + "...";
 
     const isMyPost = user?.user_id === post.itian?.user_id;
     const totalReactions = Object.values(reactions).reduce(
@@ -273,7 +281,16 @@ const PostCard = memo(
             className="text-gray-700 whitespace-pre-line leading-relaxed"
             whileHover={{ x: 2 }}
           >
-            {post.content}
+            {displayedContent}
+            {isLongContent && (
+              <button
+                className="ml-2 text-red-500 font-semibold hover:underline text-sm focus:outline-none"
+                onClick={() => setShowFullContent((prev) => !prev)}
+                type="button"
+              >
+                {showFullContent ? "Show less" : "Load more"}
+              </button>
+            )}
           </motion.p>
 
           {/* Post image */}

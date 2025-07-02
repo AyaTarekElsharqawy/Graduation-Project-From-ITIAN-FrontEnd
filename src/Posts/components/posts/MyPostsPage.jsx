@@ -247,7 +247,7 @@ const MyPostsPage = () => {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsModalOpen(true)}
-        className="fixed bottom-8 right-8 z-50 bg-red-600 hover:bg-red-700 text-white p-4 rounded-full shadow-xl flex items-center justify-center"
+        className="fixed bottom-8 right-8 z-50 bg-red-600 hover:bg-red-700 text-white p-4 rounded-full shadow-xl flex items-center justify-center mb-18"
       >
         <FiPlus className="text-xl" />
       </motion.button>

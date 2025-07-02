@@ -11,6 +11,12 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
   const [preview, setPreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({
+    title: "",
+    content: "",
+    image: "",
+    general: ""
+  });
 
   const fileInputRef = useRef(null);
   const modalRef = useRef(null);
@@ -34,6 +40,27 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate image file
+      const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+      const maxSize = 2 * 1024 * 1024; // 2MB
+      
+      if (!validTypes.includes(file.type)) {
+        setFieldErrors({
+          ...fieldErrors,
+          image: "Please upload a valid image (JPEG, PNG, JPG, GIF)"
+        });
+        return;
+      }
+      
+      if (file.size > maxSize) {
+        setFieldErrors({
+          ...fieldErrors,
+          image: "Image size should be less than 2MB"
+        });
+        return;
+      }
+      
+      setFieldErrors({ ...fieldErrors, image: "" });
       setPostData({ ...postData, image: file });
       const reader = new FileReader();
       reader.onloadend = () => setPreview(reader.result);
@@ -41,9 +68,53 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
     }
   };
 
+  const validateFields = () => {
+    const errors = {
+      title: "",
+      content: "",
+      image: "",
+      general: ""
+    };
+    
+    let isValid = true;
+    
+    // Validate title if provided
+    if (postData.title && postData.title.length > 255) {
+      errors.title = "Title should be less than 255 characters";
+      isValid = false;
+    }
+    
+    // Validate content if provided
+    if (postData.content && postData.content.length > 5000) {
+      errors.content = "Content is too long";
+      isValid = false;
+    }
+    
+    // New validation: If title is provided, content must also be provided
+    if (postData.title.trim() && !postData.content.trim()) {
+      errors.content = "Please provide content when adding a title";
+      isValid = false;
+    }
+    
+    // Check if at least one field is provided
+    if (!postData.title.trim() && !postData.content.trim() && !postData.image) {
+      errors.general = "Please provide at least one of: content or image (title requires content)";
+      isValid = false;
+    }
+    
+    setFieldErrors(errors);
+    return isValid;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!validateFields()) {
+      return;
+    }
+    
     setIsSubmitting(true);
+
     try {
       const newPost = await createPost(postData);
       onPostCreated(newPost);
@@ -52,14 +123,36 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
         setPostData({ title: "", content: "", image: null });
         setPreview(null);
         setShowSuccess(false);
+        setFieldErrors({
+          title: "",
+          content: "",
+          image: "",
+          general: ""
+        });
         onClose();
       }, 1500);
     } catch (error) {
       console.error("Error creating post:", error);
+      setFieldErrors({
+        ...fieldErrors,
+        general: error.response?.data?.error || "Failed to create post"
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // Helper component for error messages
+  const ErrorMessage = ({ message }) => (
+    <motion.div
+      initial={{ opacity: 0, y: -5 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="text-red-500 text-xs mt-1 flex items-start"
+    >
+      <span className="mr-1">⚠️</span>
+      <span>{message}</span>
+    </motion.div>
+  );
 
   return (
     <AnimatePresence>
@@ -68,7 +161,7 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
         >
           {/* Animated Backdrop */}
           <motion.div
@@ -177,26 +270,46 @@ className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
                 </motion.div>
               ) : (
                 <form onSubmit={handleSubmit}>
+                  {/* General Error */}
+                  {fieldErrors.general && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-red-600 bg-red-100 border border-red-300 rounded-lg p-3 mb-4 text-sm font-medium shadow-sm flex items-start"
+                    >
+                      <span className="mr-2">⚠️</span>
+                      <span>{fieldErrors.general}</span>
+                    </motion.div>
+                  )}
+
                   {/* Title Field */}
                   <motion.div 
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 0.2 }}
-                    className="mb-6"
+                    className="mb-4"
                   >
                     <label className="block text-red-700 font-medium mb-2">
-                      Title
+                      Title <span className="text-gray-400 text-sm">(requires content)</span>
                     </label>
                     <div className="relative">
                       <input
                         type="text"
                         placeholder="Give your post a title"
                         value={postData.title}
-                        onChange={(e) =>
-                          setPostData({ ...postData, title: e.target.value })
-                        }
-                        className="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-300 shadow-sm"
-                        required
+                        onChange={(e) => {
+                          setPostData({ ...postData, title: e.target.value });
+                          if (fieldErrors.title || fieldErrors.content) {
+                            setFieldErrors({ 
+                              ...fieldErrors, 
+                              title: "",
+                              content: "" 
+                            });
+                          }
+                        }}
+                        className={`w-full border-2 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-200 transition-all duration-300 shadow-sm ${
+                          fieldErrors.title ? "border-red-400" : "border-gray-200 focus:border-red-500"
+                        }`}
                       />
                       <motion.div 
                         whileHover={{ scale: 1.05 }}
@@ -205,6 +318,10 @@ className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
                         ✏️
                       </motion.div>
                     </div>
+                    {fieldErrors.title && <ErrorMessage message={fieldErrors.title} />}
+                    <div className="text-xs text-gray-500 mt-1 text-right">
+                      {postData.title.length}/255 characters
+                    </div>
                   </motion.div>
 
                   {/* Content Field */}
@@ -212,21 +329,29 @@ className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 0.3 }}
-                    className="mb-6"
+                    className="mb-4"
                   >
                     <label className="block text-red-700 font-medium mb-2">
-                      Content
+                      Content <span className="text-gray-400 text-sm">(optional unless title is provided)</span>
                     </label>
                     <textarea
                       placeholder="What's on your mind?"
                       rows="4"
                       value={postData.content}
-                      onChange={(e) =>
-                        setPostData({ ...postData, content: e.target.value })
-                      }
-                      className="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-300 shadow-sm resize-none"
-                      required
+                      onChange={(e) => {
+                        setPostData({ ...postData, content: e.target.value });
+                        if (fieldErrors.content) {
+                          setFieldErrors({ ...fieldErrors, content: "" });
+                        }
+                      }}
+                      className={`w-full border-2 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-200 transition-all duration-300 shadow-sm resize-none ${
+                        fieldErrors.content ? "border-red-400" : "border-gray-200 focus:border-red-500"
+                      }`}
                     />
+                    {fieldErrors.content && <ErrorMessage message={fieldErrors.content} />}
+                    <div className="text-xs text-gray-500 mt-1 text-right">
+                      {postData.content.length}/5000 characters
+                    </div>
                   </motion.div>
 
                   {/* Image Upload */}
@@ -234,24 +359,31 @@ className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 0.4 }}
-                    className="mb-8"
+                    className="mb-6"
                   >
                     <label className="block text-red-700 font-medium mb-2">
-                      Add Image (Optional)
+                      Add Image <span className="text-gray-400 text-sm">(optional)</span>
                     </label>
                     <input
                       type="file"
                       ref={fileInputRef}
                       onChange={handleImageChange}
-                      accept="image/*"
+                      accept="image/jpeg, image/png, image/jpg, image/gif"
                       className="hidden"
                     />
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       type="button"
-                      onClick={() => fileInputRef.current.click()}
-                      className="flex items-center justify-center w-full py-4 px-4 border-2 border-dashed border-red-300 rounded-xl bg-red-50 hover:bg-red-100 transition-all duration-300 shadow-inner"
+                      onClick={() => {
+                        fileInputRef.current.click();
+                        setFieldErrors({ ...fieldErrors, image: "" });
+                      }}
+                      className={`flex items-center justify-center w-full py-4 px-4 rounded-xl transition-all duration-300 shadow-inner ${
+                        fieldErrors.image 
+                          ? "border-2 border-dashed border-red-400 bg-red-50" 
+                          : "border-2 border-dashed border-red-300 bg-red-50 hover:bg-red-100"
+                      }`}
                     >
                       <motion.div 
                         animate={{ 
@@ -266,6 +398,11 @@ className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
                         {preview ? "Change Image" : "Upload an Image"}
                       </span>
                     </motion.button>
+                    
+                    {fieldErrors.image && <ErrorMessage message={fieldErrors.image} />}
+                    <div className="text-xs text-gray-500 mt-1">
+                      Max size: 2MB (JPEG, PNG, GIF)
+                    </div>
 
                     {preview && (
                       <motion.div
@@ -284,6 +421,7 @@ className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
                           onClick={() => {
                             setPreview(null);
                             setPostData({ ...postData, image: null });
+                            setFieldErrors({ ...fieldErrors, image: "" });
                           }}
                           className="absolute top-3 right-3 bg-red-600 text-white p-2 rounded-full shadow-lg hover:bg-red-700 transition-all"
                         >
