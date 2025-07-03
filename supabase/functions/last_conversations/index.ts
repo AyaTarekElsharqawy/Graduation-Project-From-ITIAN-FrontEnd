@@ -1,5 +1,5 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.3"
 
 serve(async (req) => {
   // CORS headers
@@ -23,7 +23,7 @@ serve(async (req) => {
     if (!current_user_id) {
       return new Response(
         JSON.stringify({ error: 'Missing user ID' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: { 'Content-Type': 'application/json','Access-Control-Allow-Origin': '*', } }
       )
     }
 
