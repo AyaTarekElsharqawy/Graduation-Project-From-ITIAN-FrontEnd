@@ -6,21 +6,21 @@ import { Outlet } from 'react-router-dom';
 
 function WithoutLoginLayout() {
   const tokenExists = !!localStorage.getItem('access-token');
-  
-  const reduxAuth = useSelector(state => state.auth) || {};
-  const isAuthenticated = tokenExists || reduxAuth?.isAuthenticated;
-  const userRole = reduxAuth?.user?.role || null;
+
+  const user = useSelector(state => state.user.user) || {};
+  const isAuthenticated = tokenExists && user?.id;
+  const userRole = user?.role || null;
 
   return (
     <div className="app-container">
       {!isAuthenticated ? (
         <WithoutLoginNavbar />
-      ) : userRole === 'ITian' ? (
+      ) : userRole === 'itian' ? (
         <ItianNavbar />
       ) : (
         <EmployerNavbar />
       )}
-      
+
       <main className="main-content">
         <Outlet />
       </main>
