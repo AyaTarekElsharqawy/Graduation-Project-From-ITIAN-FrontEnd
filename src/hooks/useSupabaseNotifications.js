@@ -20,7 +20,6 @@ const useSupabaseNotifications = (onNotification, userId) => {
     }
     
     reconnectTimeoutRef.current = setTimeout(() => {
-      console.log('🔄 Attempting to reconnect realtime subscription...');
       setupSubscription();
     }, 2000);
   }, []);
@@ -32,13 +31,11 @@ const useSupabaseNotifications = (onNotification, userId) => {
   const finalUserId = userId || storedUserId;
 
   if (!finalUserId) {
-    console.log('❌ No userId provided, skipping subscription');
     return;
   }
 
   // Clean up existing subscription first
   if (subscriptionRef.current) {
-    console.log('🧹 Cleaning up existing subscription');
     subscriptionRef.current.unsubscribe();
     subscriptionRef.current = null;
     isConnectedRef.current = false;
@@ -62,18 +59,15 @@ const useSupabaseNotifications = (onNotification, userId) => {
           filter: `user_id=eq.${finalUserId}`
         },
         (payload) => {
-          console.log('📨 New notification received via realtime:', payload);
           if (payload.new && callbackRef.current) {
             callbackRef.current(payload.new);
           }
         }
       )
       .subscribe((status, err) => {
-        console.log('📡 Subscription status:', status, err ? 'Error:' : '', err);
 
         switch (status) {
           case 'SUBSCRIBED':
-            console.log('✅ Successfully subscribed to notifications for user:', finalUserId);
             isConnectedRef.current = true;
             if (reconnectTimeoutRef.current) {
               clearTimeout(reconnectTimeoutRef.current);
@@ -82,19 +76,16 @@ const useSupabaseNotifications = (onNotification, userId) => {
             break;
 
           case 'CHANNEL_ERROR':
-            console.error('❌ Channel subscription error:', err);
             isConnectedRef.current = false;
             reconnect();
             break;
 
           case 'TIMED_OUT':
-            console.error('⏰ Channel subscription timed out');
             isConnectedRef.current = false;
             reconnect();
             break;
 
           case 'CLOSED':
-            console.log('🔒 Channel subscription closed');
             isConnectedRef.current = false;
             break;
         }
@@ -115,7 +106,6 @@ const useSupabaseNotifications = (onNotification, userId) => {
     // Cleanup function
     return () => {
       if (subscriptionRef.current) {
-        console.log('🧹 Cleaning up notification subscription for user:', userId);
         subscriptionRef.current.unsubscribe();
         subscriptionRef.current = null;
         isConnectedRef.current = false;
@@ -145,7 +135,6 @@ const useSupabaseNotifications = (onNotification, userId) => {
   return {
     cleanup: () => {
       if (subscriptionRef.current) {
-        console.log('🧹 Manual cleanup of notification subscription');
         subscriptionRef.current.unsubscribe();
         subscriptionRef.current = null;
         isConnectedRef.current = false;

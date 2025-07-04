@@ -73,7 +73,6 @@ import EmailVerificationFailed from "./pages/EmailVerificationFailed";
 
 function AppContent() {
   useAuthInit();
-  const isLoading = useSelector((state) => state.user.isLoading);
   const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
 
@@ -88,9 +87,6 @@ function AppContent() {
     }
   }, [user, dispatch]);
 
-  if (isLoading) {
-    return <LoaderOverlay text="Checking authentication..." />;
-  }
 
   return (
     <Router>
