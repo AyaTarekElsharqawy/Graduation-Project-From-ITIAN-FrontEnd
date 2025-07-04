@@ -117,11 +117,25 @@ const schema = Yup.object().shape({
       ];
       return allowedTypes.includes(file.type);
     }),
+  profile_picture: Yup.mixed()
+    .test('fileType', 'The profile picture field must be an image (jpg, png, gif, webp).', (value) => {
+      if (!value || value.length === 0) return true; // allow empty (nullable)
+      const file = value[0];
+      if (!file) return true;
+      const validImageTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'image/webp',
+        'image/jpg',
+      ];
+      return validImageTypes.includes(file.type);
+    }),
 });
 
 const CreateItianProfile = () => {
   const navigate = useNavigate();
-  const { register, handleSubmit, control, formState: { errors }, watch } = useForm({
+  const { register, handleSubmit, control, formState: { errors }, watch, reset } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
       first_name: "",
@@ -153,7 +167,6 @@ const CreateItianProfile = () => {
   const [previewImage, setPreviewImage] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [imageError, setImageError] = useState(""); // إضافة حالة خطأ للصورة
 
   // Check for token on mount
   useEffect(() => {
@@ -176,32 +189,8 @@ const CreateItianProfile = () => {
     }
   }, [profilePictureFile]);
 
-  // التحقق من الصورة عند التغيير
-  const handleProfilePictureChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const validImageTypes = [
-        'image/jpeg',
-        'image/png',
-        'image/gif',
-        'image/webp',
-        'image/jpg',
-      ];
-      if (!validImageTypes.includes(file.type)) {
-        setImageError("The profile picture field must be an image (jpg, png, gif, webp).");
-        return;
-      }
-      setImageError("");
-    } else {
-      setImageError("");
-    }
-  };
-
   const onSubmit = async (data) => {
     setError("");
-    if (imageError) {
-      return;
-    }
     setLoading(true);
 
     const token = localStorage.getItem("access-token");
@@ -251,6 +240,7 @@ const CreateItianProfile = () => {
       });
       setLoading(false);
       localStorage.setItem("profileCreated", "true");
+      reset(); // Reset form and errors before navigating
       navigate("/itian-profile");
     } catch (err) {
       let errorMsg = "Failed to create profile. Please try again.";
@@ -347,7 +337,7 @@ const CreateItianProfile = () => {
     >
       <div
         style={{
-          maxWidth: "42rem", // تم تغيير العرض من 48rem إلى 42rem
+          maxWidth: "42rem", 
           margin: "0 auto",
         }}
       >
@@ -356,29 +346,29 @@ const CreateItianProfile = () => {
             background: "linear-gradient(135deg, #E63946, #A63946)",
             borderRadius: "1.5rem",
             boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
-            marginBottom: "2rem", // تم تقليل الهامش السفلي
+            marginBottom: "2rem", 
             overflow: "hidden",
           }}
         >
           <div
             style={{
-              padding: "1.5rem", // تم تقليل البادنج
+              padding: "1.5rem", 
               display: "flex",
-              justifyContent: "center", // توسيط المحتوى
+              justifyContent: "center", 
               alignItems: "center",
             }}
           >
             <User
               style={{
-                width: "1.75rem", // تم تقليل الحجم
-                height: "1.75rem", // تم تقليل الحجم
+                width: "1.75rem", 
+                height: "1.75rem",
                 color: "#FFFFFF",
-                marginRight: "0.75rem", // تم تقليل المسافة
+                marginRight: "0.75rem", 
               }}
             />
             <h1
               style={{
-                fontSize: "2rem", // تم تقليل حجم الخط
+                fontSize: "2rem", 
                 fontWeight: "800",
                 color: "#FFFFFF",
                 letterSpacing: "0.5px",
@@ -396,8 +386,8 @@ const CreateItianProfile = () => {
             borderRadius: "1.5rem",
             boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
             border: "1px solid #A8A8A8",
-            padding: "2rem", // تم تقليل البادنج
-            gap: "1.5rem", // تم تقليل المسافة بين العناصر
+            padding: "2rem", 
+            gap: "1.5rem",
             display: "flex",
             flexDirection: "column",
           }}
@@ -406,20 +396,20 @@ const CreateItianProfile = () => {
           <div>
             <h4
               style={{
-                fontSize: "1.5rem", // تم تقليل حجم الخط
+                fontSize: "1.5rem", 
                 fontWeight: "bold",
                 color: "#E63946",
-                marginBottom: "1rem", // تم تقليل الهامش السفلي
+                marginBottom: "1rem",
                 display: "flex",
                 alignItems: "center",
               }}
             >
               <User
                 style={{
-                  width: "1.25rem", // تم تقليل الحجم
-                  height: "1.25rem", // تم تقليل الحجم
+                  width: "1.25rem", 
+                  height: "1.25rem", 
                   color: "#E63946",
-                  marginRight: "0.5rem", // تم تقليل المسافة
+                  marginRight: "0.5rem", 
                 }}
               />
               Personal Information
@@ -428,7 +418,7 @@ const CreateItianProfile = () => {
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr",
-                gap: "1rem", // تم تقليل المسافة
+                gap: "1rem",
               }}
             >
               {[
@@ -461,7 +451,7 @@ const CreateItianProfile = () => {
                         borderRadius: "0.75rem",
                         fontSize: "1rem",
                         transition: "all 0.3s ease",
-                        height: "5rem", // تم تقليل الارتفاع
+                        height: "5rem", 
                       }}
                       placeholder={`Enter ${label.toLowerCase()}`}
                     />
@@ -512,18 +502,18 @@ const CreateItianProfile = () => {
                 {previewImage && (
                   <div
                     style={{
-                      marginBottom: "0.75rem", // تم تقليل الهامش
+                      marginBottom: "0.75rem", 
                     }}
                   >
                     <img
                       src={previewImage}
                       alt="Image preview"
                       style={{
-                        width: "6rem", // تم تقليل الحجم
-                        height: "6rem", // تم تقليل الحجم
+                        width: "6rem", 
+                        height: "6rem", 
                         objectFit: "cover",
                         borderRadius: "0.75rem",
-                        border: "3px solid #A8A8A8", // تم تقليل السماكة
+                        border: "3px solid #A8A8A8", 
                       }}
                     />
                   </div>
@@ -531,7 +521,6 @@ const CreateItianProfile = () => {
                 <input
                   type="file"
                   {...register("profile_picture")}
-                  onChange={handleProfilePictureChange}
                   style={{
                     width: "100%",
                     padding: "0.75rem",
@@ -541,8 +530,8 @@ const CreateItianProfile = () => {
                     transition: "all 0.3s ease",
                   }}
                 />
-                {imageError && (
-                  <p style={{ color: "#E63946", fontSize: "0.875rem", marginTop: "0.25rem" }}>{imageError}</p>
+                {errors.profile_picture && (
+                  <p style={{ color: "#E63946", fontSize: "0.875rem", marginTop: "0.25rem" }}>{errors.profile_picture.message}</p>
                 )}
               </div>
               <div>
@@ -587,20 +576,20 @@ const CreateItianProfile = () => {
           <div>
             <h4
               style={{
-                fontSize: "1.5rem", // تم تقليل حجم الخط
+                fontSize: "1.5rem",
                 fontWeight: "bold",
                 color: "#E63946",
-                marginBottom: "1rem", // تم تقليل الهامش السفلي
+                marginBottom: "1rem", 
                 display: "flex",
                 alignItems: "center",
               }}
             >
               <Mail
                 style={{
-                  width: "1.25rem", // تم تقليل الحجم
-                  height: "1.25rem", // تم تقليل الحجم
+                  width: "1.25rem", 
+                  height: "1.25rem", 
                   color: "#E63946",
-                  marginRight: "0.5rem", // تم تقليل المسافة
+                  marginRight: "0.5rem", 
                 }}
               />
               Contact Information
@@ -609,7 +598,7 @@ const CreateItianProfile = () => {
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr",
-                gap: "1rem", // تم تقليل المسافة
+                gap: "1rem", 
               }}
             >
               {[
