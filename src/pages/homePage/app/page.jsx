@@ -92,26 +92,21 @@ function LandingPageContent() {
   const { data: response = {}, isLoading: testimonialsLoading } = useGetTestimonialsQuery();
   const testimonials = Array.isArray(response.data) ? response.data : [];
 
-  const role = useSelector((state) => state.user.role);
-  const itianProfile = useSelector((state) => state.user.itianProfile);
-  const employerProfile = useSelector((state) => state.user.employerProfile);
-
-  const name = role === 'itian'
-    ? itianProfile?.first_name
-    : employerProfile?.company_name;
-
-  const email = role === 'itian'
-    ? itianProfile?.email
-    : employerProfile?.email;
+  // Use only the user slice for name/email
+  const user = useSelector((state) => state.user?.user || state.user);
+  // Try to get name from multiple possible fields
+  const name = user?.first_name || user?.name || user?.company_name || user?.username || user?.email?.split('@')[0] || "Anonymous";
+  const email = user?.email || "noemail@example.com";
+  const role = user?.role;
 
   const handleSendMessage = async () => {
     if (!message.trim()) return;
     await addTestimonial({
-      name: name || "Anonymous",
-      email: email || "noemail@example.com",
-      role: role,
-      message: message,
-      rating: rating
+      name,
+      email,
+      role,
+      message,
+      rating
     });
     setMessage('')
     setRating(0)
@@ -597,54 +592,6 @@ function LandingPageContent() {
         </div>
       </FadeInElement>
 
-      {/* Quick Links */}
-      <FadeInElement delay={1}>
-        <div className="space-y-6">
-          <h4 className="font-semibold mb-6 text-lg text-white border-b border-red-400 pb-2 inline-block">
-            {t('footer.quickLinks.title')}
-          </h4>
-          <ul className="space-y-3">
-            {role === 'itian' && (
-              <li>
-                <Link to="/jobs" className="text-gray-300 hover:text-red-400 transition-all duration-300 flex items-center group">
-                  <span className="w-2 h-2 bg-red-400 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                  {t('footer.quickLinks.items.findJobs')}
-                </Link>
-              </li>
-            )}
-            {role === 'employer' && (
-              <li>
-                <Link to="/employer/post-job" className="text-gray-300 hover:text-red-400 transition-all duration-300 flex items-center group">
-                  <span className="w-2 h-2 bg-red-400 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                  {t('footer.quickLinks.items.postJob')}
-                </Link>
-              </li>
-            )}
-            <li>
-              <Link to="/posts" className="text-gray-300 hover:text-red-400 transition-all duration-300 flex items-center group">
-                <span className="w-2 h-2 bg-red-400 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                {t('footer.quickLinks.items.community')}
-              </Link>
-            </li>
-            {role === 'itian' && (
-              <li>
-                <Link to="/itian/my-reports" className="text-gray-300 hover:text-red-400 transition-all duration-300 flex items-center group">
-                  <span className="w-2 h-2 bg-red-400 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                  {t('footer.quickLinks.items.reports') || 'Reports'}
-                </Link>
-              </li>
-            )}
-            {role === 'employer' && (
-              <li>
-                <Link to="/employer/my-reports" className="text-gray-300 hover:text-red-400 transition-all duration-300 flex items-center group">
-                  <span className="w-2 h-2 bg-red-400 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                  {t('footer.quickLinks.items.reports') || 'Reports'}
-                </Link>
-              </li>
-            )}
-          </ul>
-        </div>
-      </FadeInElement>
 
       {/* Empty Column for Spacing */}
       <div className="hidden md:block"></div>
@@ -680,7 +627,7 @@ function LandingPageContent() {
                 Email:
               </p>
               <a href="mailto:info@iticareergateway.com" className="text-sm hover:text-red-400 transition-colors duration-300 text-gray-300">
-                info@iticareergateway.com
+               aliaaheshamzaki@gmail.com
               </a>
             </div>
           </div>

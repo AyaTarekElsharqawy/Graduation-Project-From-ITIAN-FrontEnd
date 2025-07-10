@@ -332,12 +332,12 @@ const CreateItianProfile = () => {
       style={{
         minHeight: "100vh",
         background: "#FFFFFF",
-        padding: "2rem 1rem",
+        padding: "3rem 1rem",
       }}
     >
       <div
         style={{
-          maxWidth: "42rem", 
+          maxWidth: "48rem",
           margin: "0 auto",
         }}
       >
@@ -346,29 +346,28 @@ const CreateItianProfile = () => {
             background: "linear-gradient(135deg, #E63946, #A63946)",
             borderRadius: "1.5rem",
             boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
-            marginBottom: "2rem", 
+            marginBottom: "2.5rem",
             overflow: "hidden",
           }}
         >
           <div
             style={{
-              padding: "1.5rem", 
+              padding: "2rem",
               display: "flex",
-              justifyContent: "center", 
               alignItems: "center",
             }}
           >
             <User
               style={{
-                width: "1.75rem", 
-                height: "1.75rem",
+                width: "2rem",
+                height: "2rem",
                 color: "#FFFFFF",
-                marginRight: "0.75rem", 
+                marginRight: "1rem",
               }}
             />
             <h1
               style={{
-                fontSize: "2rem", 
+                fontSize: "2.5rem",
                 fontWeight: "800",
                 color: "#FFFFFF",
                 letterSpacing: "0.5px",
@@ -386,8 +385,8 @@ const CreateItianProfile = () => {
             borderRadius: "1.5rem",
             boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
             border: "1px solid #A8A8A8",
-            padding: "2rem", 
-            gap: "1.5rem",
+            padding: "2.5rem",
+            gap: "2rem",
             display: "flex",
             flexDirection: "column",
           }}
@@ -396,20 +395,20 @@ const CreateItianProfile = () => {
           <div>
             <h4
               style={{
-                fontSize: "1.5rem", 
+                fontSize: "1.75rem",
                 fontWeight: "bold",
                 color: "#E63946",
-                marginBottom: "1rem",
+                marginBottom: "1.5rem",
                 display: "flex",
                 alignItems: "center",
               }}
             >
               <User
                 style={{
-                  width: "1.25rem", 
-                  height: "1.25rem", 
+                  width: "1.5rem",
+                  height: "1.5rem",
                   color: "#E63946",
-                  marginRight: "0.5rem", 
+                  marginRight: "0.75rem",
                 }}
               />
               Personal Information
@@ -418,7 +417,7 @@ const CreateItianProfile = () => {
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr",
-                gap: "1rem",
+                gap: "1.5rem",
               }}
             >
               {[
@@ -451,7 +450,7 @@ const CreateItianProfile = () => {
                         borderRadius: "0.75rem",
                         fontSize: "1rem",
                         transition: "all 0.3s ease",
-                        height: "5rem", 
+                        height: "6rem",
                       }}
                       placeholder={`Enter ${label.toLowerCase()}`}
                     />
@@ -502,18 +501,18 @@ const CreateItianProfile = () => {
                 {previewImage && (
                   <div
                     style={{
-                      marginBottom: "0.75rem", 
+                      marginBottom: "1rem",
                     }}
                   >
                     <img
                       src={previewImage}
                       alt="Image preview"
                       style={{
-                        width: "6rem", 
-                        height: "6rem", 
+                        width: "8rem",
+                        height: "8rem",
                         objectFit: "cover",
                         borderRadius: "0.75rem",
-                        border: "3px solid #A8A8A8", 
+                        border: "4px solid #A8A8A8",
                       }}
                     />
                   </div>
@@ -576,20 +575,20 @@ const CreateItianProfile = () => {
           <div>
             <h4
               style={{
-                fontSize: "1.5rem",
+                fontSize: "1.75rem",
                 fontWeight: "bold",
                 color: "#E63946",
-                marginBottom: "1rem", 
+                marginBottom: "1.5rem",
                 display: "flex",
                 alignItems: "center",
               }}
             >
               <Mail
                 style={{
-                  width: "1.25rem", 
-                  height: "1.25rem", 
+                  width: "1.5rem",
+                  height: "1.5rem",
                   color: "#E63946",
-                  marginRight: "0.5rem", 
+                  marginRight: "0.75rem",
                 }}
               />
               Contact Information
@@ -598,7 +597,7 @@ const CreateItianProfile = () => {
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr",
-                gap: "1rem", 
+                gap: "1.5rem",
               }}
             >
               {[
@@ -655,20 +654,20 @@ const CreateItianProfile = () => {
           <div>
             <h4
               style={{
-                fontSize: "1.5rem", // تم تقليل حجم الخط
+                fontSize: "1.75rem",
                 fontWeight: "bold",
                 color: "#E63946",
-                marginBottom: "1rem", // تم تقليل الهامش السفلي
+                marginBottom: "1.5rem",
                 display: "flex",
                 alignItems: "center",
               }}
             >
               <Briefcase
                 style={{
-                  width: "1.25rem", // تم تقليل الحجم
-                  height: "1.25rem", // تم تقليل الحجم
+                  width: "1.5rem",
+                  height: "1.5rem",
                   color: "#E63946",
-                  marginRight: "0.5rem", // تم تقليل المسافة
+                  marginRight: "0.75rem",
                 }}
               />
               Skills
@@ -680,7 +679,7 @@ const CreateItianProfile = () => {
                   display: "flex",
                   alignItems: "center",
                   gap: "1rem",
-                  marginBottom: "0.75rem", // تم تقليل الهامش
+                  marginBottom: "1rem",
                 }}
               >
                 <input
@@ -717,7 +716,6 @@ const CreateItianProfile = () => {
                       padding: "0.5rem 1rem",
                       borderRadius: "0.5rem",
                       transition: "background 0.3s ease",
-                      fontSize: "0.875rem", // تم تقليل حجم الخط
                     }}
                     onMouseOver={(e) => (e.target.style.background = "#A63946")}
                     onMouseOut={(e) => (e.target.style.background = "#E63946")}
@@ -747,7 +745,6 @@ const CreateItianProfile = () => {
                 padding: "0.5rem 1rem",
                 borderRadius: "0.5rem",
                 transition: "background 0.3s ease",
-                fontSize: "0.875rem", // تم تقليل حجم الخط
               }}
               onMouseOver={(e) => (e.target.style.background = "#A63946")}
               onMouseOut={(e) => (e.target.style.background = "#E63946")}
@@ -759,20 +756,20 @@ const CreateItianProfile = () => {
           <div>
             <h4
               style={{
-                fontSize: "1.5rem", // تم تقليل حجم الخط
+                fontSize: "1.75rem",
                 fontWeight: "bold",
                 color: "#E63946",
-                marginBottom: "1rem", // تم تقليل الهامش السفلي
+                marginBottom: "1.5rem",
                 display: "flex",
                 alignItems: "center",
               }}
             >
               <BookOpen
                 style={{
-                  width: "1.25rem", // تم تقليل الحجم
-                  height: "1.25rem", // تم تقليل الحجم
+                  width: "1.5rem",
+                  height: "1.5rem",
                   color: "#E63946",
-                  marginRight: "0.5rem", // تم تقليل المسافة
+                  marginRight: "0.75rem",
                 }}
               />
               Projects
@@ -782,7 +779,7 @@ const CreateItianProfile = () => {
                 key={field.id}
                 style={{
                   gap: "1rem",
-                  marginBottom: "1.25rem", // تم تقليل الهامش
+                  marginBottom: "1.5rem",
                 }}
               >
                 <div>
@@ -843,7 +840,7 @@ const CreateItianProfile = () => {
                       borderRadius: "0.75rem",
                       fontSize: "1rem",
                       transition: "all 0.3s ease",
-                      height: "5rem", // تم تقليل الارتفاع
+                      height: "6rem",
                     }}
                     placeholder="Enter project description"
                   />
@@ -906,7 +903,6 @@ const CreateItianProfile = () => {
                       padding: "0.5rem 1rem",
                       borderRadius: "0.5rem",
                       transition: "background 0.3s ease",
-                      fontSize: "0.875rem", // تم تقليل حجم الخط
                     }}
                     onMouseOver={(e) => (e.target.style.background = "#A63946")}
                     onMouseOut={(e) => (e.target.style.background = "#E63946")}
@@ -936,7 +932,6 @@ const CreateItianProfile = () => {
                 padding: "0.5rem 1rem",
                 borderRadius: "0.5rem",
                 transition: "background 0.3s ease",
-                fontSize: "0.875rem", // تم تقليل حجم الخط
               }}
               onMouseOver={(e) => (e.target.style.background = "#A63946")}
               onMouseOut={(e) => (e.target.style.background = "#E63946")}
@@ -949,20 +944,20 @@ const CreateItianProfile = () => {
           <div>
             <h4
               style={{
-                fontSize: "1.5rem", // تم تقليل حجم الخط
+                fontSize: "1.75rem",
                 fontWeight: "bold",
                 color: "#E63946",
-                marginBottom: "1rem", // تم تقليل الهامش السفلي
+                marginBottom: "1.5rem",
                 display: "flex",
                 alignItems: "center",
               }}
             >
               <Upload
                 style={{
-                  width: "1.25rem", // تم تقليل الحجم
-                  height: "1.25rem", // تم تقليل الحجم
+                  width: "1.5rem",
+                  height: "1.5rem",
                   color: "#E63946",
-                  marginRight: "0.5rem", // تم تقليل المسافة
+                  marginRight: "0.75rem",
                 }}
               />
               Upload CV
@@ -990,7 +985,7 @@ const CreateItianProfile = () => {
             style={{
               display: "flex",
               justifyContent: "center",
-              marginTop: "1.5rem", // تم تقليل الهامش
+              marginTop: "2rem",
             }}
           >
             <button
@@ -1007,7 +1002,6 @@ const CreateItianProfile = () => {
                 alignItems: "center",
                 gap: "0.5rem",
                 cursor: loading ? "not-allowed" : "pointer",
-                fontSize: "1rem", // تم تقليل حجم الخط
               }}
               onMouseOver={(e) => !loading && (e.target.style.background = "#A63946")}
               onMouseOut={(e) => !loading && (e.target.style.background = "#E63946")}
